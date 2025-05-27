@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClimsaEU - Clinical medicine student association</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Light gray background */
+            color: #334155; /* Dark slate gray text */
+        }
+        .hero-background {
+            background-image: url('https://placehold.co/1920x600/e0f2f7/2980b9?text=Climsa+Hero+Image'); /* Placeholder hero image */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        /* Custom styles for smoother transitions */
+        .transition-all {
+            transition-property: all;
+            transition-duration: 300ms;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* Loading spinner styles */
+        .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: none; /* Hidden by default */
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Styles for the floating AI button */
+        #open-ai-chat-button-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #8B5CF6; /* Purple */
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 9999px; /* Fully rounded */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 1000; /* Ensure it's above other content */
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease-in-out;
+        }
+
+        #open-ai-chat-button-float:hover {
+            background-color: #7C3AED; /* Darker purple */
+            transform: scale(1.05);
+        }
+
+        /* Styles for the AI Chat Popup */
+        #ai-chat-popup {
+            position: fixed;
+            bottom: 90px; /* Adjust based on button height */
+            right: 20px;
+            width: 90%; /* Responsive width */
+            max-width: 400px; /* Max width for larger screens */
+            height: 500px; /* Fixed height for chat window */
+            background-color: white;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Hide scrollbars on the main popup */
+            transform: translateY(20px); /* Initial state for animation */
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        #ai-chat-popup.open {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .chat-header {
+            background-color: #3B82F6; /* Blue */
+            color: white;
+            padding: 1rem;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+
+        .chat-close-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .chat-close-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto; /* Enable scrolling for messages */
+            background-color: #F8FAFC; /* Light background for chat area */
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .chat-message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .chat-message.user {
+            background-color: #BFDBFE; /* Light blue for user messages */
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+            color: #1E3A8A; /* Darker blue text for better contrast */
+        }
+
+        .chat-message.ai {
+            background-color: #E0F2FE; /* Even lighter blue for AI messages */
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+            color: #0C4A6E; /* Darker cyan text for better contrast */
+        }
+
+        .chat-input-area {
+            padding: 1rem;
+            border-top: 1px solid #E2E8F0; /* Light border */
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chat-input-area textarea {
+            flex-grow: 1;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            border: 1px solid #CBD5E0;
+            resize: none; /* Disable manual resize */
+            min-height: 40px;
+            max-height: 100px; /* Limit height of textarea */
+            overflow-y: auto; /* Allow scrolling within textarea if content exceeds max-height */
+        }
+
+        .chat-send-button {
+            background-color: #3B82F6; /* Blue */
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px; /* Ensure button has a minimum width */
+            min-height: 40px; /* Ensure button has a minimum height */
+        }
+
+        .chat-send-button:hover {
+            background-color: #2563EB; /* Darker blue */
+        }
+        .chat-send-button:disabled {
+            background-color: #9CA3AF; /* Gray when disabled */
+            cursor: not-allowed;
+        }
+
+
+        /* Styles for the News Detail Modal */
+        .news-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); /* Dark overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000; /* Above chat popup */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .news-modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .news-modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh; /* Limit height to viewport */
+            overflow-y: auto; /* Enable scrolling for long content */
+            position: relative;
+            transform: translateY(20px); /* Initial state for animation */
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .news-modal-overlay.open .news-modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .news-modal-close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #64748B; /* Slate gray */
+            transition: color 0.2s;
+        }
+
+        .news-modal-close-button:hover {
+            color: #334155; /* Darker slate gray */
+        }
+
+        /* Styles for the Login Modal */
+        #login-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Darker overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2500; /* Above news modal */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        #login-modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .login-modal-content {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            transform: translateY(30px);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+
+        #login-modal-overlay.open .login-modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .login-close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #64748B;
+            transition: color 0.2s;
+        }
+
+        .login-close-button:hover {
+            color: #334155;
+        }
+
+        .login-form input[type="text"],
+        .login-form input[type="password"] {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #CBD5E0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .login-form button[type="submit"] {
+            background-color: #10B981; /* Green */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+
+        .login-form button[type="submit"]:hover {
+            background-color: #059669; /* Darker green */
+        }
+
+        .login-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        .login-message.success {
+            background-color: #D1FAE5; /* Light green */
+            color: #065F46; /* Dark green */
+        }
+        .login-message.error {
+            background-color: #FEE2E2; /* Light red */
+            color: #991B1B; /* Dark red */
+        }
+
+        /* Styles for the All News Modal */
+        #all-news-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000; /* Same as news detail modal */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        #all-news-modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #all-news-modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            width: 90%;
+            max-width: 900px; /* Wider for multiple news items */
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+
+        #all-news-modal-overlay.open #all-news-modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .all-news-item {
+            background-color: #F8FAFC;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .all-news-item:last-child {
+            margin-bottom: 0;
+        }
+        .all-news-item h4 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1E3A8A; /* Darker blue for titles */
+            margin-bottom: 0.5rem;
+        }
+        .all-news-item p.date {
+            font-size: 0.875rem;
+            color: #6B7280;
+            margin-bottom: 1rem;
+        }
+        .all-news-item p.content {
+            font-size: 1rem;
+            color: #4B5563;
+            line-height: 1.6;
+        }
+
+        /* Media queries for responsiveness */
+        @media (max-width: 768px) {
+            .all-news-modal-content {
+                padding: 1.5rem;
+            }
+            .all-news-item h4 {
+                font-size: 1.25rem;
+            }
+             #ai-chat-popup {
+                bottom: 20px;
+                right: 10px;
+                left: 10px;
+                width: auto; /* Use auto width and rely on max-width */
+                max-width: calc(100% - 20px); /* Ensure some padding from screen edges */
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-md py-4">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <img src="https://placehold.co/40x40/3498db/ffffff?text=C" alt="Climsa Logo" class="h-10 w-10 rounded-full mr-3">
+                <h1 class="text-2xl font-bold text-blue-700">Climsa</h1>
+            </div>
+
+            <nav class="w-full md:w-auto">
+                <ul class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-8 text-lg font-medium">
+                    <li><a href="#home" class="text-gray-700 hover:text-blue-600 transition-all rounded-md px-3 py-2">Home</a></li>
+                    <li><a href="#about" class="text-gray-700 hover:text-blue-600 transition-all rounded-md px-3 py-2">About Us</a></li>
+                    <li><a href="#services" class="text-gray-700 hover:text-blue-600 transition-all rounded-md px-3 py-2">Services</a></li>
+                    <li><a href="#" id="nav-membership-login" class="text-gray-700 hover:text-blue-600 transition-all rounded-md px-3 py-2">Membership Login</a></li>
+                    <li><a href="#news" class="text-gray-700 hover:text-blue-600 transition-all rounded-md px-3 py-2">News & Events</a></li>
+                    <li><a href="#contact" class="text-gray-700 hover:text-blue-600 transition-all rounded-md px-3 py-2">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="home" class="hero-background text-white py-20 md:py-32 flex items-center justify-center text-center rounded-b-lg shadow-lg">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6 drop-shadow-lg">
+                Empowering Clinical Officers for Better Healthcare
+            </h2>
+            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto drop-shadow-md">
+                Climsa is dedicated to advancing the clinical officer profession through education, advocacy, and community support.
+            </p>
+            <a href="#" id="hero-join-community-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:scale-105">
+                Join Our Community
+            </a>
+        </div>
+    </section>
+
+    <section id="about" class="py-16 md:py-24 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h3 class="text-3xl md:text-4xl font-bold text-center text-blue-700 mb-12">About Climsa</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="text-lg leading-relaxed">
+                    <p class="mb-6">
+                        Climsa (Clinical Medical Students Association) is a leading professional organization committed to supporting and enhancing the roles of clinical officers across the nation. Founded on principles of excellence, integrity, and service, we strive to create a robust network for our members.
+                    </p>
+                    <p class="mb-6">
+                        Our mission is to empower clinical officers with the knowledge, skills, and resources necessary to deliver high-quality healthcare services. We advocate for policies that recognize and elevate the profession, ensuring clinical officers play a pivotal role in the healthcare ecosystem.
+                    </p>
+                    <p>
+                        Through continuous professional development, ethical practice guidelines, and collaborative initiatives, Climsa aims to foster a community where clinical officers can thrive and contribute significantly to public health.
+                    </p>
+                </div>
+                <div class="flex justify-center">
+                    <img src="https://placehold.co/500x350/a7d9f7/1d4ed8?text=Our+Mission" alt="About Climsa" class="rounded-lg shadow-xl w-full max-w-md" onerror="this.onerror=null;this.src='https://placehold.co/500x350/cccccc/ffffff?text=Image+Not+Found';">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-4">
+            <h3 class="text-3xl md:text-4xl font-bold text-center text-blue-700 mb-12">Our Services & Programs</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gray-50 p-8 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2">
+                    <div class="text-blue-600 mb-4 text-5xl flex justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                        </svg>
+                    </div>
+                    <h4 class="text-2xl font-semibold text-center text-gray-800 mb-4">Professional Development</h4>
+                    <p class="text-gray-600 text-center">
+                        Workshops, seminars, and online courses to enhance clinical skills and knowledge.
+                    </p>
+                </div>
+                <div class="bg-gray-50 p-8 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2">
+                    <div class="text-blue-600 mb-4 text-5xl flex justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46" />
+                        </svg>
+                    </div>
+                    <h4 class="text-2xl font-semibold text-center text-gray-800 mb-4">Advocacy & Policy</h4>
+                    <p class="text-gray-600 text-center">
+                        Representing clinical officers' interests to policymakers and healthcare stakeholders.
+                    </p>
+                </div>
+                <div class="bg-gray-50 p-8 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2">
+                    <div class="text-blue-600 mb-4 text-5xl flex justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                        </svg>
+                    </div>
+                    <h4 class="text-2xl font-semibold text-center text-gray-800 mb-4">Networking & Community</h4>
+                    <p class="text-gray-600 text-center">
+                        Opportunities to connect with peers, mentors, and leaders in the healthcare field.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="membership" class="py-16 md:py-24 bg-gray-50">
+        <div class="container mx-auto px-4 text-center">
+            <h3 class="text-3xl md:text-4xl font-bold text-blue-700 mb-8">Become a Member</h3>
+            <p class="text-lg text-gray-700 max-w-2xl mx-auto mb-10">
+                Join Climsa today and unlock a world of resources, professional growth opportunities, and a supportive community dedicated to your success as a clinical officer. To apply, click the button below, and an email draft will open. Please include your full name, contact information, and a brief statement of interest in the email.
+            </p>
+            <div class="flex flex-col md:flex-row justify-center space-y-6 md:space-y-0 md:space-x-8">
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all transform hover:scale-105">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-3">Exclusive Resources</h4>
+                    <p class="text-gray-600">Access to research papers, guidelines, and educational materials.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all transform hover:scale-105">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-3">Networking Events</h4>
+                    <p class="text-gray-600">Attend conferences, workshops, and social gatherings.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all transform hover:scale-105">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-3">Career Support</h4>
+                    <p class="text-gray-600">Job board, mentorship programs, and career guidance.</p>
+                </div>
+            </div>
+            <a href="mailto:membership@climsa.org?subject=Membership Application Inquiry&body=Dear Climsa Team,%0D%0A%0D%0AI am writing to inquire about becoming a member of Climsa. %0D%0A%0D%0AMy Full Name: [Your Full Name]%0D%0AContact Email: [Your Email]%0D%0APhone Number: [Your Phone Number]%0D%0A%0D%0ABrief Statement of Interest:%0D%0A[Type your statement here]%0D%0A%0D%0AThank you." class="mt-12 inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:scale-105">
+                Apply for Membership
+            </a>
+        </div>
+    </section>
+
+    <section id="news" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-4">
+            <h3 class="text-3xl md:text-4xl font-bold text-center text-blue-700 mb-12">Latest News & Events</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-gray-50 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all">
+                    <img src="https://placehold.co/400x250/d1e7dd/28a745?text=Event+Image+1" alt="Event Image" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/cccccc/ffffff?text=Image+Not+Found';">
+                    <div class="p-6">
+                        <h4 class="text-xl font-semibold text-gray-800 mb-2">Annual Clinical Officers Conference</h4>
+                        <p class="text-gray-600 text-sm mb-4">Date: October 26, 2025 | Location: Nairobi Convention Center</p>
+                        <p class="text-gray-700">Join us for our biggest event of the year, featuring keynote speakers, workshops, and networking opportunities.</p>
+                        <a href="#" class="mt-4 inline-block text-blue-600 hover:text-blue-800 font-medium transition-all read-more-button"
+                           data-title="Annual Clinical Officers Conference"
+                           data-date="October 26, 2025"
+                           data-content="The Annual Clinical Officers Conference is the premier event for clinical officers across the nation. This year, we are excited to host a diverse range of keynote speakers who are leaders in various medical fields. The conference will feature interactive workshops covering the latest advancements in clinical practice, diagnostic techniques, and patient care. Attendees will have unparalleled opportunities to network with peers, mentors, and industry experts, fostering collaborations and professional growth. Don't miss this chance to enhance your skills, share knowledge, and contribute to the future of healthcare.">Read More &rarr;</a>
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all">
+                    <img src="https://placehold.co/400x250/f8d7da/dc3545?text=News+Image+1" alt="News Image" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/cccccc/ffffff?text=Image+Not+Found';">
+                    <div class="p-6">
+                        <h4 class="text-xl font-semibold text-gray-800 mb-2">New Guidelines for Primary Healthcare</h4>
+                        <p class="text-gray-600 text-sm mb-4">Date: May 15, 2025 | Category: News</p>
+                        <p class="text-gray-700">Climsa releases updated guidelines to improve primary healthcare delivery across the country.</p>
+                        <a href="#" class="mt-4 inline-block text-blue-600 hover:text-blue-800 font-medium transition-all read-more-button"
+                           data-title="New Guidelines for Primary Healthcare"
+                           data-date="May 15, 2025"
+                           data-content="Climsa is proud to announce the release of comprehensive updated guidelines for primary healthcare. These guidelines are developed in collaboration with leading medical experts and aim to standardize best practices, improve patient outcomes, and enhance the efficiency of healthcare delivery at the primary level. They cover a wide range of topics including preventative care, common disease management, and community health initiatives. We encourage all clinical officers to review and implement these new guidelines to ensure the highest quality of care for our communities.">Read More &rarr;</a>
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all">
+                    <img src="https://placehold.co/400x250/cfe2ff/007bff?text=Workshop+Image" alt="Workshop Image" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/cccccc/ffffff?text=Image+Not+Found';">
+                    <div class="p-6">
+                        <h4 class="text-xl font-semibold text-gray-800 mb-2">Workshop: Advanced Diagnostic Techniques</h4>
+                        <p class="text-gray-600 text-sm mb-4">Date: June 10, 2025 | Location: Online Webinar</p>
+                        <p class="text-gray-700">A virtual workshop focusing on the latest advancements in diagnostic methods for clinical officers.</p>
+                        <a href="#" class="mt-4 inline-block text-blue-600 hover:text-blue-800 font-medium transition-all read-more-button"
+                           data-title="Workshop: Advanced Diagnostic Techniques"
+                           data-date="June 10, 2025"
+                           data-content="Join our upcoming virtual workshop on Advanced Diagnostic Techniques, designed specifically for clinical officers. This workshop will delve into the latest innovations in medical diagnostics, including new imaging modalities, laboratory testing methods, and point-of-care diagnostics. Expert speakers will provide practical insights and case studies to help you enhance your diagnostic accuracy and clinical decision-making. This is a valuable opportunity for continuous professional development and staying at the forefront of medical technology.">Read More &rarr;</a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-12">
+                <a href="#" id="view-all-news-button" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:scale-105">
+                    View All News & Events
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="py-16 md:py-24 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h3 class="text-3xl md:text-4xl font-bold text-center text-blue-700 mb-12">Contact Us</h3>
+            <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+                <p class="text-lg text-gray-700 text-center mb-8">
+                    Have questions or want to get in touch? Fill out the form below or reach us directly.
+                </p>
+                <form action="mailto:info@climsa.org" method="post" enctype="text/plain" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Your Name</label>
+                        <input type="text" id="name" name="Name" class="shadow appearance-none border rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="John Doe">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Your Email</label>
+                        <input type="email" id="email" name="Email" class="shadow appearance-none border rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="john.doe@example.com">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="subject" class="block text-gray-700 text-sm font-bold mb-2">Subject</label>
+                        <input type="text" id="subject" name="Subject" class="shadow appearance-none border rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Inquiry about membership">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="message" class="block text-gray-700 text-sm font-bold mb-2">Message</label>
+                        <textarea id="message" name="Message" rows="6" class="shadow appearance-none border rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Type your message here..."></textarea>
+                    </div>
+                    <div class="md:col-span-2 text-center">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:scale-105">
+                            Send Message
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-10 text-center">
+                    <p class="text-gray-700 mb-2"><strong>Email:</strong> info@climsa.org</p>
+                    <p class="text-gray-700 mb-2"><strong>Phone:</strong> +254 712 345 678</p>
+                    <p class="text-gray-700"><strong>Address:</strong> Nairobi,Kenya</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+            <div class="mb-4 md:mb-0">
+                <p>&copy; 2025 Climsa. All rights reserved. Designed by Isaack</p>
+            </div>
+            <div class="flex space-x-6">
+                <a href="#" class="text-gray-400 hover:text-white transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.772 1.691 4.91 4.91.058 1.265.069 1.645.069 4.849 0 3.204-.012 3.584-.069 4.849-.138 3.22-1.669 4.772-4.91 4.91-1.265.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.069-3.22-.138-4.772-1.669-4.91-4.91-.058-1.265-.07-1.644-.07-4.849 0-3.204.012-3.584.069-4.849.139-3.22 1.669-4.772 4.91-4.91 1.265-.058 1.645-.07 4.849-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.073 4.948.073 3.259 0 3.668-.014 4.948-.073 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.073-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                <a href="#" class="text-gray-400 hover:text-white transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M22.258 1H2.742C1.782 1 1 1.782 1 2.742v18.516C1 22.218 1.782 23 2.742 23h18.516C22.218 23 23 22.218 23 21.258V2.742C23 1.782 22.218 1 22.258 1zM18.156 7.508c0-.66-.536-1.196-1.196-1.196H7.04c-.66 0-1.196.536-1.196 1.196v9.064c0 .66.536 1.196 1.196 1.196h9.92c.66 0 1.196-.536 1.196-1.196V7.508zM15.5 12l-4.5 3.5v-7l4.5 3.5z"/></svg>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6.064 9.293c-.304.132-.628.236-.968.307.35-.207.618-.535.743-.923-.326.194-.687.335-1.072.411-.307-.328-.747-.533-1.233-.533-1.075 0-1.946.87-1.946 1.946 0 .152.017.3.047.442-1.619-.081-3.056-.855-4.018-2.032-.168.287-.266.62-.266.976 0 .675.343 1.27.868 1.62-.319-.01-.618-.098-.882-.242v.025c0 1.058.752 1.938 1.748 2.138-.183.05-.376.077-.577.077-.141 0-.277-.014-.41-.04.277.864 1.085 1.494 2.046 1.672-.746.585-1.683.935-2.701.935-.175 0-.346-.01-.515-.03 1.019.653 2.227 1.036 3.528 1.036 4.23 0 6.54-3.509 6.54-6.54 0-.101-.002-.204-.007-.305.377-.272.699-.612.959-.997z"/></svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <button id="open-ai-chat-button-float">
+       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+        </svg>
+        AI Chat
+    </button>
+
+    <div id="ai-chat-popup">
+        <div class="chat-header">
+            Climsa AI Assistant
+            <button class="chat-close-button" id="close-chat-button">&times;</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            </div>
+        <div class="chat-input-area">
+            <textarea id="chat-question-input" placeholder="Ask a medical question..." rows="1"></textarea>
+            <button id="send-chat-button" class="chat-send-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                </svg>
+            </button>
+            <div id="chat-loading-spinner" class="loader"></div>
+        </div>
+    </div>
+
+    <div id="news-detail-modal-overlay" class="news-modal-overlay">
+        <div class="news-modal-content">
+            <button class="news-modal-close-button" id="close-news-modal">&times;</button>
+            <h3 id="modal-news-title" class="text-2xl font-bold text-blue-700 mb-4"></h3>
+            <p id="modal-news-date" class="text-gray-600 text-sm mb-6"></p>
+            <div id="modal-news-content" class="text-gray-800 leading-relaxed"></div>
+        </div>
+    </div>
+
+    <div id="login-modal-overlay" class="login-modal-overlay">
+        <div class="login-modal-content">
+            <button class="login-close-button" id="close-login-modal">&times;</button>
+            <h3 class="text-2xl font-bold text-center text-blue-700 mb-6">Member Login</h3>
+            <form id="login-form" class="login-form">
+                <div class="mb-4">
+                    <label for="login-email" class="block text-gray-700 text-sm font-bold mb-2">Email/Username</label>
+                    <input type="text" id="login-email" placeholder="Enter your email or username">
+                </div>
+                <div class="mb-6">
+                    <label for="login-password" class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password">
+                </div>
+                <button type="submit">Login</button>
+                <div id="login-message" class="login-message hidden"></div> </form>
+            <p class="text-center text-gray-600 text-sm mt-4">
+                Don't have an account? <a href="mailto:membership@climsa.org?subject=New Membership Registration Inquiry&body=Dear Climsa Team,%0D%0A%0D%0AI am interested in registering for a new membership. Please provide me with information on how to proceed.%0D%0A%0D%0AMy Full Name: [Your Full Name]%0D%0AContact Email: [Your Email]%0D%0APhone Number: [Your Phone Number]%0D%0A%0D%0AThank you." class="text-blue-600 hover:underline font-medium">Register Here</a>
+            </p>
+        </div>
+    </div>
+
+    <div id="all-news-modal-overlay" class="news-modal-overlay">
+        <div id="all-news-modal-content" class="news-modal-content">
+            <button class="news-modal-close-button" id="close-all-news-modal">&times;</button>
+            <h3 class="text-3xl font-bold text-center text-blue-700 mb-8">All News & Events</h3>
+            <div id="all-news-list" class="grid grid-cols-1 gap-6">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                // Prevent default for '#' links or if the target doesn't exist
+                if (href === '#' || !document.querySelector(href)) {
+                    e.preventDefault();
+                    // If it's just '#', do nothing more.
+                    if (href === '#') return;
+                }
+                
+                const targetElement = document.querySelector(href);
+                if (targetElement) {
+                    e.preventDefault();
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // AI Chat Popup Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const openAiChatButtonFloat = document.getElementById('open-ai-chat-button-float');
+            const aiChatPopup = document.getElementById('ai-chat-popup');
+            const closeChatButton = document.getElementById('close-chat-button');
+            const chatQuestionInput = document.getElementById('chat-question-input');
+            const sendChatButton = document.getElementById('send-chat-button');
+            const chatMessagesDiv = document.getElementById('chat-messages');
+            const chatLoadingSpinner = document.getElementById('chat-loading-spinner');
+
+            // --- Chat History Implementation ---
+            let conversationHistory = []; // Stores the entire conversation {role: 'user'/'model', parts: [{text: message}]}
+
+            const initializeChat = () => {
+                // Clear existing messages from display
+                chatMessagesDiv.innerHTML = '';
+                // Add initial AI message to display and history
+                const initialAiMessage = "Hello! I am your Climsa AI Assistant. How can I help you today?";
+                addMessageToChatDisplay(initialAiMessage, 'ai');
+                // Add to conversation history for API context if needed, though typically initial greeting isn't part of history for the first user query.
+                // For this version, we'll start building history from the first user interaction.
+                // If you want the initial greeting to be part of the history for the API, uncomment the next line:
+                // conversationHistory.push({ role: "model", parts: [{ text: initialAiMessage }] });
+            };
+            
+            const toggleChatPopup = () => {
+                aiChatPopup.classList.toggle('open');
+                if (aiChatPopup.classList.contains('open')) {
+                    if (conversationHistory.length === 0) { // Only initialize if history is empty
+                        initializeChat();
+                    }
+                    chatQuestionInput.focus();
+                    chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Scroll to bottom
+                }
+            };
+
+            openAiChatButtonFloat.addEventListener('click', toggleChatPopup);
+            closeChatButton.addEventListener('click', toggleChatPopup);
+
+            const addMessageToChatDisplay = (message, sender) => {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('chat-message', sender);
+                messageDiv.textContent = message;
+                chatMessagesDiv.appendChild(messageDiv);
+                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Auto-scroll to the latest message
+            };
+
+        const sendMessage = async () => {
+  const userQuestion = chatQuestionInput.value.trim();
+  if (!userQuestion) return;
+
+  addMessageToChatDisplay(userQuestion, 'user');
+  conversationHistory.push({ role: "user", parts: [{ text: userQuestion }] });
+  chatQuestionInput.value = '';
+  chatQuestionInput.style.height = 'auto';
+
+  chatLoadingSpinner.style.display = 'block';
+  sendChatButton.disabled = true;
+
+  try {
+    const payload = {
+      contents: conversationHistory,
+      // Add any other configuration you need
+    };
+
+    // Use the proxy endpoint instead of direct API call
+    const response = await fetch('https://gemini-backend-rust.vercel.app/api/gemini-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('API Error Response:', errorData);
+      throw new Error(errorData.error?.message || 'Unknown error');
+    }
+    
+    const result = await response.json();
+
+    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+      const aiResponseText = result.candidates[0].content.parts[0].text;
+      addMessageToChatDisplay(aiResponseText, 'ai');
+      conversationHistory.push({ role: "model", parts: [{ text: aiResponseText }] });
+    } else {
+      addMessageToChatDisplay('Sorry, I could not generate a response at this moment. Please try again.', 'ai');
+      conversationHistory.push({ role: "model", parts: [{ text: "Sorry, I could not generate a response at this moment. Please try again." }] });
+      console.error('Unexpected API response structure:', result);
+    }
+  } catch (error) {
+    addMessageToChatDisplay(`An error occurred: ${error.message}. Please try again.`, 'ai');
+    conversationHistory.push({ role: "model", parts: [{ text: `An error occurred: ${error.message}. Please try again.` }] });
+    console.error('Error:', error);
+  } finally {
+    chatLoadingSpinner.style.display = 'none';
+    sendChatButton.disabled = false;
+    chatQuestionInput.focus();
+  }
+};
+
+
+            sendChatButton.addEventListener('click', sendMessage);
+            chatQuestionInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) { // Send on Enter, allow Shift+Enter for new line
+                    e.preventDefault(); // Prevent default Enter behavior (new line)
+                    sendMessage();
+                }
+            });
+
+            // Auto-resize textarea
+            chatQuestionInput.addEventListener('input', () => {
+                chatQuestionInput.style.height = 'auto'; // Reset height
+                chatQuestionInput.style.height = (chatQuestionInput.scrollHeight) + 'px'; // Set to scroll height
+            });
+            
+            // Initialize chat when popup is first made visible (or on DOMContentLoaded if always visible)
+            // If chat starts closed, initialize on first open.
+            // If you want it to always have the initial greeting even if not opened, call initializeChat() here.
+            // For now, it initializes on first open via toggleChatPopup.
+
+
+            // News Detail Modal Logic
+            const newsModalOverlay = document.getElementById('news-detail-modal-overlay');
+            const closeNewsModalButton = document.getElementById('close-news-modal');
+            const modalNewsTitle = document.getElementById('modal-news-title');
+            const modalNewsDate = document.getElementById('modal-news-date');
+            const modalNewsContent = document.getElementById('modal-news-content');
+            const readMoreButtons = document.querySelectorAll('.read-more-button');
+
+            const openNewsModal = (title, date, content) => {
+                modalNewsTitle.textContent = title;
+                modalNewsDate.textContent = `Date: ${date}`;
+                modalNewsContent.innerHTML = content.replace(/\n/g, '<br>'); // Preserve line breaks
+                newsModalOverlay.classList.add('open');
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            };
+
+            const closeNewsModal = () => {
+                newsModalOverlay.classList.remove('open');
+                document.body.style.overflow = ''; // Restore background scrolling
+            };
+
+            readMoreButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const title = button.dataset.title;
+                    const date = button.dataset.date;
+                    const content = button.dataset.content;
+                    openNewsModal(title, date, content);
+                });
+            });
+
+            closeNewsModalButton.addEventListener('click', closeNewsModal);
+            newsModalOverlay.addEventListener('click', (e) => { // Close if clicked outside content
+                if (e.target === newsModalOverlay) {
+                    closeNewsModal();
+                }
+            });
+
+            // Login Modal Logic
+            const loginModalOverlay = document.getElementById('login-modal-overlay');
+            const closeLoginModalButton = document.getElementById('close-login-modal');
+            const navMembershipLogin = document.getElementById('nav-membership-login');
+            const heroJoinCommunityButton = document.getElementById('hero-join-community-button');
+            const loginForm = document.getElementById('login-form');
+            const loginEmailInput = document.getElementById('login-email');
+            const loginPasswordInput = document.getElementById('login-password');
+            const loginMessageDiv = document.getElementById('login-message');
+
+            const openLoginModal = (e) => {
+                e.preventDefault();
+                loginModalOverlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+                loginEmailInput.focus();
+                loginMessageDiv.classList.add('hidden'); // Reset message
+                loginMessageDiv.textContent = '';
+            };
+
+            const closeLoginModal = () => {
+                loginModalOverlay.classList.remove('open');
+                document.body.style.overflow = '';
+                loginForm.reset(); // Clear form fields
+                loginMessageDiv.classList.add('hidden');
+                loginMessageDiv.textContent = '';
+            };
+
+            if (navMembershipLogin) navMembershipLogin.addEventListener('click', openLoginModal);
+            if (heroJoinCommunityButton) heroJoinCommunityButton.addEventListener('click', openLoginModal);
+            
+            if (closeLoginModalButton) closeLoginModalButton.addEventListener('click', closeLoginModal);
+            if (loginModalOverlay) loginModalOverlay.addEventListener('click', (e) => {
+                if (e.target === loginModalOverlay) {
+                    closeLoginModal();
+                }
+            });
+
+            if (loginForm) loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = loginEmailInput.value.trim();
+                const password = loginPasswordInput.value.trim();
+
+                loginMessageDiv.classList.remove('hidden', 'success', 'error'); // Reset classes
+
+                if (email === '' || password === '') {
+                    loginMessageDiv.textContent = 'Please enter both email/username and password.';
+                    loginMessageDiv.classList.add('error');
+                } else if (email === 'user@climsa.org' && password === 'password123') {
+                    loginMessageDiv.textContent = 'Login successful! Redirecting...';
+                    loginMessageDiv.classList.add('success');
+                    setTimeout(() => {
+                        closeLoginModal();
+                        // Potentially redirect or update UI for logged-in state here
+                    }, 1500);
+                } else {
+                    loginMessageDiv.textContent = 'Invalid email/username or password.';
+                    loginMessageDiv.classList.add('error');
+                }
+                loginMessageDiv.classList.remove('hidden'); // Make message visible
+            });
+
+            // All News and Events Modal Logic
+            const allNewsModalOverlay = document.getElementById('all-news-modal-overlay');
+            const closeAllNewsModalButton = document.getElementById('close-all-news-modal');
+            const allNewsListDiv = document.getElementById('all-news-list');
+            const viewAllNewsButton = document.getElementById('view-all-news-button');
+
+            const allNewsEvents = [
+                { title: "Annual Clinical Officers Conference", date: "October 26, 2025", fullContent: "The Annual Clinical Officers Conference is the premier event... (Content from your HTML)" },
+                { title: "New Guidelines for Primary Healthcare", date: "May 15, 2025", fullContent: "Climsa is proud to announce the release... (Content from your HTML)" },
+                { title: "Workshop: Advanced Diagnostic Techniques", date: "June 10, 2025", fullContent: "Join our upcoming virtual workshop... (Content from your HTML)" },
+                { title: "Webinar: Mental Health First Aid for Clinical Officers", date: "July 5, 2025", fullContent: "A crucial webinar focusing on equipping clinical officers with essential skills for providing initial support to individuals experiencing mental health crises. Learn to identify signs, offer help, and guide individuals to professional care." },
+                { title: "Community Outreach Program: Diabetes Screening", date: "August 20, 2025", fullContent: "Climsa is organizing a free diabetes screening and awareness campaign in collaboration with local health centers. Volunteers are needed to assist with screenings, patient education, and logistical support. Join us in making a positive impact on community health." },
+                { title: "Call for Papers: Climsa Journal of Clinical Practice", date: "September 1, 2025", fullContent: "We invite clinical officers and researchers to submit original research, case reports, and review articles for the next issue of the Climsa Journal of Clinical Practice. This is an excellent opportunity to share your work and contribute to the body of clinical knowledge." },
+                { title: "Training Session: Pediatric Emergency Care", date: "November 12, 2025", fullContent: "An intensive training session designed to enhance the skills of clinical officers in managing pediatric emergencies. The course will cover common pediatric conditions, resuscitation techniques, and emergency drug administration." },
+                { title: "Climsa Annual General Meeting (AGM)", date: "December 5, 2025", fullContent: "All Climsa members are invited to attend the Annual General Meeting. We will review the year's achievements, discuss future plans, and elect new board members. Your participation is vital for the growth of our association." }
+            ];
+
+            const openAllNewsModal = (e) => {
+                if(e) e.preventDefault();
+                allNewsListDiv.innerHTML = ''; // Clear previous content
+
+                allNewsEvents.forEach(item => {
+                    const newsItemDiv = document.createElement('div');
+                    newsItemDiv.classList.add('all-news-item');
+                    newsItemDiv.innerHTML = `
+                        <h4 class="text-xl font-semibold text-gray-800 mb-2">${item.title}</h4>
+                        <p class="text-gray-600 text-sm mb-4">Date: ${item.date}</p>
+                        <p class="text-gray-700">${item.fullContent.replace(/\n/g, '<br>')}</p> 
+                    `; // Replaced \n with <br> for HTML display
+                    allNewsListDiv.appendChild(newsItemDiv);
+                });
+
+                allNewsModalOverlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closeAllNewsModal = () => {
+                allNewsModalOverlay.classList.remove('open');
+                document.body.style.overflow = '';
+            };
+
+            if (viewAllNewsButton) viewAllNewsButton.addEventListener('click', openAllNewsModal);
+            if (closeAllNewsModalButton) closeAllNewsModalButton.addEventListener('click', closeAllNewsModal);
+            if (allNewsModalOverlay) allNewsModalOverlay.addEventListener('click', (e) => {
+                if (e.target === allNewsModalOverlay) {
+                    closeAllNewsModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
