@@ -13,10 +13,30 @@
             color: #334155; /* Dark slate gray text */
         }
         .hero-background {
-            background-image: url('https://galleries.page.link/evwKX'); /* Placeholder hero image */
+            position: relative;
+        }
+        .hero-background::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url('img/hero.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            filter: blur(0px);
+            z-index: 0;
+        }
+        .hero-background::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5); /* dark overlay */
+            z-index: 1;
+            pointer-events: none;
+        }
+        .hero-background > .container {
+            position: relative;
+            z-index: 2;
         }
         /* Custom styles for smoother transitions */
         .transition-all {
@@ -459,11 +479,11 @@
     <section id="home" class="hero-background text-white py-20 md:py-32 flex items-center justify-center text-center rounded-b-lg shadow-lg">
         <div class="container mx-auto px-4">
             <h2 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6 drop-shadow-lg">
-                Empowering Clinical Officers for Better Healthcare
+               <span style="color: #f1eaea;"> Empowering Clinical Officers for Better Healthcare </span>
             </h2>
             <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto drop-shadow-md">
-                Climsa is dedicated to advancing the clinical officer profession through education, advocacy, and community support.
-            </p>
+                <span style="color: #ebebeb;">Climsa is dedicated to advancing the clinical officer profession through education, advocacy, and community support.
+                </span> </p>
             <a href="#" id="hero-join-community-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:scale-105">
                 Join Our Community
             </a>
