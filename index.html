@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
+    <link rel="manifest" href="img/site.webmanifest">
+
     <title>ClimsaEU - Clinical medicine student association</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -459,8 +464,8 @@
     <header class="bg-white shadow-md py-4">
         <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
             <div class="flex items-center mb-4 md:mb-0">
-                <img src="https://placehold.co/40x40/3498db/ffffff?text=C" alt="Climsa Logo" class="h-10 w-10 rounded-full mr-3">
-                <h1 class="text-2xl font-bold text-blue-700">Climsa</h1>
+                <img src="img/logo.png" alt="Climsa Logo" class="h-10 w-10 rounded-full mr-3">
+                <h1 class="text-2xl font-bold text-blue-700">ClimsaEU</h1><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#48A9A6" viewBox="0 0 256 256"><path d="M220,160a12,12,0,1,1-12-12A12,12,0,0,1,220,160Zm-4.55,39.29A48.08,48.08,0,0,1,168,240H144a48.05,48.05,0,0,1-48-48V151.49A64,64,0,0,1,40,88V40a8,8,0,0,1,8-8H72a8,8,0,0,1,0,16H56V88a48,48,0,0,0,48.64,48c26.11-.34,47.36-22.25,47.36-48.83V48H136a8,8,0,0,1,0-16h24a8,8,0,0,1,8,8V87.17c0,32.84-24.53,60.29-56,64.31V192a32,32,0,0,0,32,32h24a32.06,32.06,0,0,0,31.22-25,40,40,0,1,1,16.23.27ZM232,160a24,24,0,1,0-24,24A24,24,0,0,0,232,160Z"></path></svg>
             </div>
 
             <nav class="w-full md:w-auto">
@@ -476,19 +481,40 @@
         </div>
     </header>
 
-    <section id="home" class="hero-background text-white py-20 md:py-32 flex items-center justify-center text-center rounded-b-lg shadow-lg">
-        <div class="container mx-auto px-4">
+    <section id="home" class="hero-background text-white py-20 md:py-32 flex items-center justify-center text-center rounded-b-lg shadow-lg" style="position:relative; overflow:hidden;">
+        <!-- Carousel Images -->
+        <div id="hero-carousel-images" style="position:absolute; inset:0; z-index:0;">
+            <img src="img/hero.jpg" alt="Hero 1" class="carousel-img absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100" style="opacity:1;">
+            <img src="img/hero2.jpg" alt="Hero 2" class="carousel-img absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0" style="opacity:0;">
+            <img src="img/hero3.jpg" alt="Hero 3" class="carousel-img absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0" style="opacity:0;">
+            <!-- Optional: fallback background color -->
+            <div style="position:absolute; inset:0; background:rgba(0,0,0,0.5); z-index:1;"></div>
+        </div>
+        <div class="container mx-auto px-4" style="position:relative; z-index:2;">
             <h2 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6 drop-shadow-lg">
-               <span style="color: #f1eaea;"> Empowering Clinical Officers for Better Healthcare </span>
+                <span style="color: #f1eaea;">  Empowering Clinical Officers for Better Healthcare </span>
             </h2>
             <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto drop-shadow-md">
-                <span style="color: #ebebeb;">Climsa is dedicated to advancing the clinical officer profession through education, advocacy, and community support.
-                </span> </p>
-            <a href="#" id="hero-join-community-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:scale-105">
-                Join Our Community
-            </a>
+                <span style="color: #ebebeb;">
+                    Climsa is dedicated to advancing the clinical officer profession through education, advocacy, and community support.
+                </span>
+            </p>
+          <a href="#" id="hero-join-community-button" class="border border-white text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:bg-white hover:text-black">
+    JOIN OUR COMMUNITY
+</a>
         </div>
     </section>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const images = document.querySelectorAll('#hero-carousel-images .carousel-img');
+        let current = 0;
+        setInterval(() => {
+            images[current].style.opacity = 0;
+            current = (current + 1) % images.length;
+            images[current].style.opacity = 1;
+        }, 4000);
+    });
+    </script>
 
     <section id="about" class="py-16 md:py-24 bg-gray-50">
         <div class="container mx-auto px-4">
@@ -506,12 +532,12 @@
                     </p>
                 </div>
                 <div class="flex justify-center">
-                    <img src="img/mission.jpg" alt="About Climsa" class="rounded-lg shadow-xl w-full max-w-md" onerror="this.onerror=null;this.src='https://placehold.co/500x350/cccccc/ffffff?text=Image+Not+Found';">
+                    <img src="img/msn.jpg" alt="About Climsa" class="rounded-lg shadow-xl w-full max-w-md" onerror="this.onerror=null;this.src='https://placehold.co/500x350/cccccc/ffffff?text=Image+Not+Found';">
                 </div>
             </div>
         </div>
     </section>
-
+    
     <section id="services" class="py-16 md:py-24 bg-white">
         <div class="container mx-auto px-4">
             <h3 class="text-3xl md:text-4xl font-bold text-center text-blue-700 mb-12">Our Services & Programs</h3>
@@ -1043,3 +1069,4 @@
     </script>
 </body>
 </html>
+
