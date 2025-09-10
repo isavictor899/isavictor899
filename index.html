@@ -464,6 +464,17 @@
                 width: auto; /* Use auto width and rely on max-width */
                 max-width: calc(100% - 20px); /* Ensure some padding from screen edges */
             }
+        /* Better mobile button sizing */
+             .mobile-touch-target {
+              min-height: 44px;
+             min-width: 44px;
+}
+
+/* Improve scroll performance */
+           .scroll-container {
+           -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+}
         }
     </style>
 </head>
@@ -1077,6 +1088,7 @@
     </script>
 </body>
 </html>
+
 
 
 
